@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:5000",
+    "engines": {
+    "node": "^15.10.0"
+    },
   "dependencies": {
     "@react-pdf/renderer": "^1.6.13",
     "axios": "^0.21.1",
