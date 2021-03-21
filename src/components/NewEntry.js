@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from "react-redux";
-import { createFood } from '../actions/food_actions';
+import { createItem } from '../actions/item_actions';
 import { Col, Form, Card, Button, NavLink, Accordion } from 'react-bootstrap';
 
 function NewEntry() {
@@ -31,7 +31,7 @@ function NewEntry() {
   };
 
   const handleSubmit = () => {
-    dispatch(createFood(entry))
+    dispatch(createItem(entry))
   };
 
   return (

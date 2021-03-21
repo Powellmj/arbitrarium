@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from "react-redux";
-import { updateFood } from '../actions/food_actions';
+import { updateItem } from '../actions/item_actions';
 import { Modal, Button, Form, Col, NavLink } from 'react-bootstrap';
 
 function EditEntryModel(props) {
@@ -34,7 +34,7 @@ function EditEntryModel(props) {
   };
 
   const handleSubmit = () => {
-    dispatch(updateFood(entry))
+    dispatch(updateItem(entry))
     props.onHide()
   };
 

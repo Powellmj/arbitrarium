@@ -2,32 +2,32 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Table, Container, Form, FormControl, Button } from 'react-bootstrap';
 import EditEntryModel from "./EditEntryModel"
-import { requestAllFoods, deleteFood, createManyFoods } from '../actions/food_actions';
+import { requestAllItems, deleteItem, createManyItems } from '../actions/item_actions';
 import NewEntry from './NewEntry';
 
 function HomePage() {
   const [item, setItem] = useState({ name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" });
   const [modalShow, setModalShow] = useState(false);
-  const foods = useSelector(state => state.entities.foods)
+  const items = useSelector(state => state.entities.items)
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(requestAllFoods())
+    dispatch(requestAllItems())
     setItem({ name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" })
   }, [dispatch]);
 
   const handleDeleteClick = (itemId, e) => {
     if (e.target.className.includes("shaker")) {
-      dispatch(deleteFood(itemId))
+      dispatch(deleteItem(itemId))
     } else {
       e.target.classList.add("shaker");
       setTimeout(() => {e.target.classList.remove("shaker")}, 5000)
     }
   };
 
-  const handleEditClick = (food, e) => {
+  const handleEditClick = (item, e) => {
     if (e.target.className.includes("edit")) {
-      setItem(food);
+      setItem(item);
       setModalShow(true);
     } else {
       e.target.classList.add("edit");
@@ -88,25 +88,25 @@ function HomePage() {
         }
         parsedList.push({ name: currentLine, notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" })
       }
-      dispatch(createManyFoods(parsedList))
+      dispatch(createManyItems(parsedList))
     }
   };
 
   const generateItems = () => {
     let rows = [];
-    let foodArr = Object.values(foods)
-    for (let i = 0; i < foodArr.length; i++) {
-      let food = foodArr[i]
+    let itemArr = Object.values(items)
+    for (let i = 0; i < itemArr.length; i++) {
+      let item = itemArr[i]
       rows.push(
-        <tr key={food._id}>
+        <tr key={item._id}>
           <td style={{ width: "60px"}}>
-            <div onClick={e => { handleDeleteClick(food._id, e) }} className="trash-can-item-list"></div>
+            <div onClick={e => { handleDeleteClick(item._id, e) }} className="trash-can-item-list"></div>
           </td>
-          <td onClick={ e => { handleEditClick(food, e) }}>{food.name}</td>
-          <td onClick={ e => { handleEditClick(food, e) }}>{food.notes}</td>
-          <td onClick={ e => { handleEditClick(food, e) }}>{food.expiration}</td>
-          <td onClick={ e => { handleEditClick(food, e) }}>{food.quantity}</td>
-          <td onClick={ e => { handleEditClick(food, e) }}>{food.unit}</td>
+          <td onClick={ e => { handleEditClick(item, e) }}>{item.name}</td>
+          <td onClick={ e => { handleEditClick(item, e) }}>{item.notes}</td>
+          <td onClick={ e => { handleEditClick(item, e) }}>{item.expiration}</td>
+          <td onClick={ e => { handleEditClick(item, e) }}>{item.quantity}</td>
+          <td onClick={ e => { handleEditClick(item, e) }}>{item.unit}</td>
         </tr>)
     }
     return rows
