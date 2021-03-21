@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from "react-redux";
 import { updateItem } from '../actions/item_actions';
-import { Modal, Button, Form, Col, NavLink } from 'react-bootstrap';
+import { Modal, Button, Form, Col } from 'react-bootstrap';
 
 function EditEntryModel(props) {
   const [entry, setEntry] = useState({ name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" });

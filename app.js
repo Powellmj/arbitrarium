@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const express = require('express')
 const path = require('path')
 const logger = require('morgan')
-const db = require('../config/keys').mongoURI;
+const db = require('./config/keys').mongoURI;
 
 const app = express()
 app.use(express.json());
@@ -12,12 +12,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 if (process.env.NODE_ENV === 'production') {
 	app.use(express.static('frontend/build'));
 	app.get('/', (req, res) => {
-		res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
+		res.sendFile(path.resolve(__dirname, 'frontend', 'build', '/index.html'));
 	})
 }
 
 const routes = {
-	"/items/": require('./routes/items'),
+	"/items/": require('./api/routes/items'),
 }
 
 const port = process.env.PORT || 5000;
