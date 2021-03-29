@@ -8,6 +8,7 @@
     "node": "^15.10.0"
   },
   "dependencies": {
+    "@babel/core": "^7.13.14",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "concurrently": "^6.0.0",
