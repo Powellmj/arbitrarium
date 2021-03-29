@@ -123,16 +123,18 @@ function HomePage() {
             a[sort.catagory].localeCompare(b[sort.catagory]) :
             b[sort.catagory].localeCompare(a[sort.catagory])
         } else {
+          if (isNaN(parseFloat(a[sort.catagory])) && isNaN(parseFloat(b[sort.catagory]))) return a.name.localeCompare(b.name);
           if (sort.asc) {
-            if (parseInt(a[sort.catagory]) > (parseInt(b[sort.catagory]))) return 1;
-            if (parseInt(b[sort.catagory]) > (parseInt(a[sort.catagory]))) return -1;
+            if (isNaN(parseFloat(a[sort.catagory]))) return -1;
+            if (isNaN(parseFloat(b[sort.catagory]))) return 1;
+            if (parseFloat(a[sort.catagory]) > (parseFloat(b[sort.catagory]))) return 1;
+            if (parseFloat(b[sort.catagory]) > (parseFloat(a[sort.catagory]))) return -1;
           } else {
-            if (parseInt(a[sort.catagory]) > (parseInt(b[sort.catagory]))) return -1;
-            if (parseInt(b[sort.catagory]) > (parseInt(a[sort.catagory]))) return 1;
+            if (isNaN(parseFloat(a[sort.catagory]))) return 1;
+            if (isNaN(parseFloat(b[sort.catagory]))) return -1;
+            if (parseFloat(a[sort.catagory]) > (parseFloat(b[sort.catagory]))) return -1;
+            if (parseFloat(b[sort.catagory]) > (parseFloat(a[sort.catagory]))) return 1;
           }
-          return sort.asc ?
-            a.name.localeCompare(b.name) :
-            b.name.localeCompare(a.name);
         }
       })
     for (let i = 0; i < itemArr.length; i++) {
