@@ -25,3 +25,11 @@
   90% { transform: translate(1px, 2px) rotate(0deg); }
   100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
+
+.item-table-header-added {
+  min-width: 90px;
+}
+
+.item-table-header-qty {
+  min-width: 70px;
+}

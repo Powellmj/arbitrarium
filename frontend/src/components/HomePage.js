@@ -9,6 +9,7 @@ import moment from 'moment';
 function HomePage() {
   const [item, setItem] = useState({ name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" });
   const [filter, setFilter] = useState("");
+  const [sort, setSort] = useState({ catagory: "name", asc: true });
   const [shakers, setShakers] = useState({});
   const [modalShow, setModalShow] = useState(false);
   const items = useSelector(state => state.entities.items)
@@ -104,9 +105,36 @@ function HomePage() {
     }
   };
 
+  const handleTableSort = (catagory) => {
+    if (catagory === sort.catagory) {
+      setSort({ catagory, asc: !sort.asc })
+    } else {
+      setSort({ catagory, asc: true })
+    }
+  };
+
   const generateItems = () => {
     let rows = [];
-    let itemArr = Object.values(items).filter(lineItem => lineItem.name.toLowerCase().includes(filter.toLowerCase()))
+    let itemArr = Object.values(items)
+      .filter(lineItem => lineItem.name.toLowerCase().includes(filter.toLowerCase()))
+      .sort((a, b) => {
+        if (sort.catagory === 'name') {
+          return sort.asc ?
+            a[sort.catagory].localeCompare(b[sort.catagory]) :
+            b[sort.catagory].localeCompare(a[sort.catagory])
+        } else {
+          if (sort.asc) {
+            if (parseInt(a[sort.catagory]) > (parseInt(b[sort.catagory]))) return 1;
+            if (parseInt(b[sort.catagory]) > (parseInt(a[sort.catagory]))) return -1;
+          } else {
+            if (parseInt(a[sort.catagory]) > (parseInt(b[sort.catagory]))) return -1;
+            if (parseInt(b[sort.catagory]) > (parseInt(a[sort.catagory]))) return 1;
+          }
+          return sort.asc ?
+            a.name.localeCompare(b.name) :
+            b.name.localeCompare(a.name);
+        }
+      })
     for (let i = 0; i < itemArr.length; i++) {
       let listItem = itemArr[i]
       rows.push(
@@ -137,10 +165,10 @@ function HomePage() {
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>Item</th>
-            <th>Added</th>
-            <th>Qty</th>
-            <th>Unit</th>
+            <th onClick={() => { handleTableSort("name") }}>{`Item ${sort.catagory === 'name' ? sort.asc ? "↑" : "↓" : " "}`}</th>
+            <th className="item-table-header-added" onClick={() => { handleTableSort("created_date") }}>{`Added ${sort.catagory === 'created_date' ? sort.asc ? "↑" : "↓" : " "}`}</th>
+            <th className="item-table-header-qty" onClick={() => { handleTableSort("quantity") }}>{`Qty ${sort.catagory === 'quantity' ? sort.asc ? "↑" : "↓" : " "}`}</th>
+            <th onClick={() => { handleTableSort("unit") }}>{`Unit ${sort.catagory === 'unit' ? sort.asc ? "↑" : "↓" : " "}`}</th>
             <th></th>
           </tr>
         </thead>
