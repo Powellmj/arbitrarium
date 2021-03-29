@@ -14,9 +14,9 @@ export const receiveAllItems = items => ({
   items
 });
 
-export const removeItem = itemId => ({
+export const removeItem = name => ({
   type: REMOVE_ITEM,
-  itemId
+  name
 });
 
 export const requestItem = itemId => dispatch => APIUtil.fetchItem(itemId)
@@ -28,7 +28,7 @@ export const requestAllItems = () => dispatch => APIUtil.fetchAllItems()
   .then(items => {
     let itemsObj = {}
     items.data.forEach(item => {
-      itemsObj[item._id] = item
+      itemsObj[item.name] = item
     })
     dispatch(receiveAllItems(itemsObj))
   })
@@ -63,7 +63,17 @@ export const updateItem = item => dispatch => (
   )
 )
 
-export const deleteItem = itemId => dispatch => {
+export const updateManyItems = updateObj => dispatch => (
+  APIUtil.updateManyItems(updateObj).then((response) => {
+    dispatch(requestAllItems())
+  }
+    // , err => (
+    //   dispatch(receiveErrors(err.response.data))
+    // )
+  )
+)
+
+export const deleteItem = (itemId, name) => dispatch => {
   APIUtil.deleteItem(itemId);
-  return dispatch(removeItem(itemId));
+  return dispatch(removeItem(name));
 }

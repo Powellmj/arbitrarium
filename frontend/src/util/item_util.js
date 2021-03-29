@@ -13,6 +13,10 @@ export const updateItem = item => {
   return axios.patch('/items/update', item);
 };
 
+export const updateManyItems = itemObj => {
+  return axios.patch('/items/index', itemObj);
+};
+
 export const fetchAllItems = () => {
   return axios.get(`/items/index/`);
 };

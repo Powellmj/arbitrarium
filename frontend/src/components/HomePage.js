@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { Table, Container, Form, FormControl, Button } from 'react-bootstrap';
+import { Table, Container, Form, FormControl, Button, Navbar, InputGroup } from 'react-bootstrap';
 import EditEntryModel from "./EditEntryModel"
-import { requestAllItems, deleteItem, createManyItems } from '../actions/item_actions';
+import { requestAllItems, deleteItem, createManyItems, updateItem } from '../actions/item_actions';
 import NewEntry from './NewEntry';
+import moment from 'moment';
 
 function HomePage() {
   const [item, setItem] = useState({ name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" });
+  const [filter, setFilter] = useState("");
+  const [shakers, setShakers] = useState({});
   const [modalShow, setModalShow] = useState(false);
   const items = useSelector(state => state.entities.items)
   const dispatch = useDispatch();
@@ -16,16 +19,20 @@ function HomePage() {
     setItem({ name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" })
   }, [dispatch]);
 
-  const handleDeleteClick = (itemId, e) => {
-    if (e.target.className.includes("shaker")) {
-      dispatch(deleteItem(itemId))
-    } else {
+  const handleDeleteClick = (listItem, e) => {
+    const deleteId = listItem._id
+    e.persist()
+    if (!e.target.className.includes("shaker")) {
       e.target.classList.add("shaker");
-      setTimeout(() => {e.target.classList.remove("shaker")}, 5000)
+      setShakers({ ...shakers, deleteId: setTimeout(() => { e.target.classList.remove("shaker") }, 5000) })
+    } else {
+      dispatch(deleteItem(deleteId, listItem.name))
+      clearTimeout(shakers[deleteId])
     }
   };
 
   const handleEditClick = (item, e) => {
+    e.persist()
     if (e.target.className.includes("edit")) {
       setItem(item);
       setModalShow(true);
@@ -36,11 +43,17 @@ function HomePage() {
   };
 
   const parseFile = (e) => {
+    if (!e) return;
+    let newItem = { name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" }
+    let refinedResultArr = [];
+    let nameCheck = /^[a-zA-Z]+/;
+    let quantityCheck = /^[\s]*\$[0-9]+.[0-9][0-9] x/g;
+    let unitCheck = /^[\s]*[0-9]+/g;
     let reader = new FileReader();
+
     reader.readAsText(e.target.files[0]);
     reader.onload = () => {
-
-      let rawResultArr = reader.result
+      reader.result
         .replace(/&nbsp;/g, ' ')
         .split("Thanks for your order, Michael")[1]
         .replace(/=\s\n/g, '')
@@ -52,61 +65,59 @@ function HomePage() {
         .replace(/&amp;/g, '&')
         .replace(/\n+/g, '\n')
         .split('\n')
+        .filter(ele => ele.length > 1)
+        .filter(ele => !ele.includes("On Sale"))
+        .slice(1)
+        .forEach(lineItem => {
+          if (quantityCheck.test(lineItem)) {
+            newItem.quantity = parseInt(newItem.quantity) * parseInt(lineItem.split(" x ")[1]);
+            refinedResultArr.push(newItem);
+            newItem = { name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" };
+          } else if (unitCheck.test(lineItem)) {
+            if (lineItem.includes("ct")) {
+              newItem.unit = lineItem.split("ct")[1].match(/[0-9]+.+[0-9]+ +[a-zA-Z]+/g) ? lineItem.split("ct")[1].match(/[0-9]+.+[0-9]+ +[a-zA-Z]+/g)[0] : "Individual";
+              newItem.quantity = parseInt(newItem.quantity) * parseInt(lineItem.split("ct")[0])
+            } else {
+              newItem.unit = lineItem
+            }
+          } else if (nameCheck.test(lineItem)) {
+            if (lineItem.includes("Substituted With")) {
+              refinedResultArr.pop();
+            } else {
+              newItem.name = lineItem
+            }
+          }
+        })
 
-      let refinedResultArr = [];
-      let concatString = ""
-      let unit = /^[0-9]+ /g;
+      let newItems = [];
 
-      for (let i = 0; i < rawResultArr.length; i++) {
-        let currentLine = rawResultArr[i]
-        let name = /[a-zA-Z]/g;
-        let quantity = /\$[0-9]+.[0-9][0-9] x/g;
-        if (name.test(currentLine[0]) && !currentLine.includes("On Sale")) {
-          concatString += concatString.length ? " " + currentLine : currentLine
-        } else if (quantity.test(currentLine)) {
-          concatString = concatString + " | " + currentLine.split(" x ")[1]
-        } else if (unit.test(currentLine)) {
-          concatString = concatString + " ^^ " + currentLine
-        }else if (concatString.length) {
-          refinedResultArr.push(concatString)
-          concatString = ""
+      refinedResultArr.forEach(lineItem => {
+        if (lineItem.name in items) {
+          let autoUpdateItem = items[lineItem.name]
+          autoUpdateItem.quantity = `${parseInt(autoUpdateItem.quantity) + parseInt(lineItem.quantity)}`;
+          dispatch(updateItem(autoUpdateItem))
+        } else {
+          newItems.push(lineItem)
         }
-      }
-
-      let parsedList = [];
-      for (let i = 0; i < refinedResultArr.length; i++) {
-        let currentLine = refinedResultArr[i]
-        if (currentLine.includes("Substituted With")) {
-          parsedList.pop();
-          continue
-        } else if (currentLine.includes(" | ")) {
-          parsedList[parsedList.length - 1].quantity = currentLine.split(" | ")[1]
-          continue
-        } else if (currentLine.includes(" ^^ ")) {
-          parsedList[parsedList.length - 1].unit = currentLine.split(" ^^ ")[1]
-          continue
-        }
-        parsedList.push({ name: currentLine, notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" })
-      }
-      dispatch(createManyItems(parsedList))
+      })
+      dispatch(createManyItems(newItems))
     }
   };
 
   const generateItems = () => {
     let rows = [];
-    let itemArr = Object.values(items)
+    let itemArr = Object.values(items).filter(lineItem => lineItem.name.toLowerCase().includes(filter.toLowerCase()))
     for (let i = 0; i < itemArr.length; i++) {
-      let item = itemArr[i]
+      let listItem = itemArr[i]
       rows.push(
-        <tr key={item._id}>
+        <tr key={listItem._id}>
+          <td onClick={ e => { handleEditClick(listItem, e) }}>{listItem.name}</td>
+          <td onClick={ e => { handleEditClick(listItem, e) }}>{moment(listItem.created_at).format("MM/DD")}</td>
+          <td onClick={ e => { handleEditClick(listItem, e) }}>{listItem.quantity}</td>
+          <td onClick={ e => { handleEditClick(listItem, e) }}>{listItem.unit}</td>
           <td style={{ width: "60px"}}>
-            <div onClick={e => { handleDeleteClick(item._id, e) }} className="trash-can-item-list"></div>
+            <div onClick={e => { handleDeleteClick(listItem, e) }} className="trash-can-item-list"></div>
           </td>
-          <td onClick={ e => { handleEditClick(item, e) }}>{item.name}</td>
-          <td onClick={ e => { handleEditClick(item, e) }}>{item.notes}</td>
-          <td onClick={ e => { handleEditClick(item, e) }}>{item.expiration}</td>
-          <td onClick={ e => { handleEditClick(item, e) }}>{item.quantity}</td>
-          <td onClick={ e => { handleEditClick(item, e) }}>{item.unit}</td>
         </tr>)
     }
     return rows
@@ -115,15 +126,22 @@ function HomePage() {
   return(
     <Container>
       <NewEntry />
+      <Navbar bg="light" expand="lg">
+        <InputGroup>
+          <FormControl type="text" placeholder="Search" value={filter} onChange={e => { setFilter(e.target.value) }} />
+          <InputGroup.Append>
+            <Button style={{ backgroundColor: "White", borderColor: "#ced4da", color: "#6c757d" }} onClick={() => { setFilter(" ") }} variant="outline-secondary">clear</Button>
+          </InputGroup.Append>
+        </InputGroup>
+      </Navbar>
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th></th>
             <th>Item</th>
-            <th>Notes</th>
-            <th>Expiration</th>
-            <th>Quantity</th>
+            <th>Added</th>
+            <th>Qty</th>
             <th>Unit</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -137,7 +155,7 @@ function HomePage() {
       />
       <Form>
         <Form.Group>
-          <Form.File id="exampleFormControlFile1" label="file input" onChange={e => { parseFile(e) }}/>
+          <Form.File label="file input" onChange={e => { parseFile(e) }}/>
         </Form.Group>
       </Form>
     </Container>

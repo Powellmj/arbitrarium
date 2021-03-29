@@ -27,6 +27,14 @@ router.patch("/update", (req, res) => {
     .catch(err => res.status(400).json({ unableToUpdate: err}))
 })
 
+router.patch("/index/", (req, res) => {
+  const filter = { _id: { $in: req.body.updateIds } }
+  const update = req.body.updatedItems;
+  Item.updateMany(filter, update, { new: true })
+    .then(item => res.json(item))
+    .catch(err => res.status(400).json({ unableToUpdate: err }))
+})
+
 router.get("/index/", (req, res) => {
   Item.find()
     .then(items => res.json(items))
@@ -40,12 +48,11 @@ router.get("/show/:itemId", (req, res) => {
 });
 
 router.delete("/:id", (req, res) => {
-  console.log(req.params.id)
   const filter = { "_id": `${req.params.id}` };
   Item.deleteOne(filter)
     .then(response => { console.log(`Deleted ${response.deletedCount} item.`); res.json(response.deletedCount)})
-  .catch(err => console.error(`Delete failed with error: ${err}`))
-  return req.params.id
+    .catch(err => console.error(`Delete failed with error: ${err}`))
+  return req.params.name
 });
 
 module.exports = router

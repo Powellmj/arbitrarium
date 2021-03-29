@@ -8,10 +8,10 @@ const items_reducer = (state = initialState, action) => {
     case RECEIVE_ALL_ITEMS:
       return Object.assign({}, state, action.items);
     case RECEIVE_ITEM:
-      return Object.assign({}, state, { [action.item._id]: action.item })
+      return Object.assign({}, state, { [action.item.name]: action.item })
     case REMOVE_ITEM:
       let newState = Object.assign({}, state)
-      delete newState[action.itemId]
+      delete newState[action.name]
       return newState
     default:
       return state;
