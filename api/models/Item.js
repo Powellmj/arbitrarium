@@ -17,6 +17,9 @@ const ItemSchema = new Schema({
   unit: {
     type: String,
   },
+  visible: {
+    type: Boolean, default: true
+  },
   created_at:
   {
     type: Date, default: Date.now

@@ -9,7 +9,7 @@ import moment from 'moment';
 function HomePage() {
   const [item, setItem] = useState({ name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" });
   const [filter, setFilter] = useState("");
-  const [sort, setSort] = useState({ catagory: "name", asc: true });
+  const [sort, setSort] = useState({ catagory: "name", asc: 1 });
   const [shakers, setShakers] = useState({});
   const [modalShow, setModalShow] = useState(false);
   const items = useSelector(state => state.entities.items)
@@ -32,10 +32,10 @@ function HomePage() {
     }
   };
 
-  const handleEditClick = (item, e) => {
+  const handleEditClick = (editingItem, e) => {
     e.persist()
     if (e.target.className.includes("edit")) {
-      setItem(item);
+      setItem(editingItem);
       setModalShow(true);
     } else {
       e.target.classList.add("edit");
@@ -106,50 +106,32 @@ function HomePage() {
   };
 
   const handleTableSort = (catagory) => {
-    if (catagory === sort.catagory) {
-      setSort({ catagory, asc: !sort.asc })
-    } else {
-      setSort({ catagory, asc: true })
-    }
+    if (catagory === sort.catagory) setSort({ catagory, asc: sort.asc * -1 })
+    else setSort({ catagory, asc: 1 })
   };
 
   const generateItems = () => {
     let rows = [];
-    let itemArr = Object.values(items)
-      .filter(lineItem => lineItem.name.toLowerCase().includes(filter.toLowerCase()))
+    Object.values(items)
+      .filter(lineItem => lineItem.visible && lineItem.name.toLowerCase().includes(filter.toLowerCase()))
       .sort((a, b) => {
-        if (sort.catagory === 'name') {
-          return sort.asc ?
-            a[sort.catagory].localeCompare(b[sort.catagory]) :
-            b[sort.catagory].localeCompare(a[sort.catagory])
-        } else {
-          if (isNaN(parseFloat(a[sort.catagory])) && isNaN(parseFloat(b[sort.catagory]))) return a.name.localeCompare(b.name);
-          if (sort.asc) {
-            if (isNaN(parseFloat(a[sort.catagory]))) return -1;
-            if (isNaN(parseFloat(b[sort.catagory]))) return 1;
-            if (parseFloat(a[sort.catagory]) > (parseFloat(b[sort.catagory]))) return 1;
-            if (parseFloat(b[sort.catagory]) > (parseFloat(a[sort.catagory]))) return -1;
-          } else {
-            if (isNaN(parseFloat(a[sort.catagory]))) return 1;
-            if (isNaN(parseFloat(b[sort.catagory]))) return -1;
-            if (parseFloat(a[sort.catagory]) > (parseFloat(b[sort.catagory]))) return -1;
-            if (parseFloat(b[sort.catagory]) > (parseFloat(a[sort.catagory]))) return 1;
-          }
-        }
+        if (isNaN(parseFloat(a[sort.catagory])) && isNaN(parseFloat(b[sort.catagory]))) return a.name.localeCompare(b.name) * sort.asc;
+        if (isNaN(parseFloat(a[sort.catagory]))) return -1 * sort.asc;
+        if (isNaN(parseFloat(b[sort.catagory]))) return 1 * sort.asc;
+        if (parseFloat(a[sort.catagory]) > (parseFloat(b[sort.catagory]))) return 1 * sort.asc;
+        if (parseFloat(b[sort.catagory]) > (parseFloat(a[sort.catagory]))) return -1 * sort.asc })
+      .forEach(listItem => {
+        rows.push(
+          <tr key={listItem._id}>
+            <td onClick={e => { handleEditClick(listItem, e) }}>{listItem.name}</td>
+            <td onClick={e => { handleEditClick(listItem, e) }}>{moment(listItem.created_at).format("MM/DD")}</td>
+            <td onClick={e => { handleEditClick(listItem, e) }}>{listItem.quantity}</td>
+            <td onClick={e => { handleEditClick(listItem, e) }}>{listItem.unit}</td>
+            <td style={{ width: "60px" }}>
+              <div onClick={e => { handleDeleteClick(listItem, e) }} className="trash-can-item-list"></div>
+            </td>
+          </tr>)
       })
-    for (let i = 0; i < itemArr.length; i++) {
-      let listItem = itemArr[i]
-      rows.push(
-        <tr key={listItem._id}>
-          <td onClick={ e => { handleEditClick(listItem, e) }}>{listItem.name}</td>
-          <td onClick={ e => { handleEditClick(listItem, e) }}>{moment(listItem.created_at).format("MM/DD")}</td>
-          <td onClick={ e => { handleEditClick(listItem, e) }}>{listItem.quantity}</td>
-          <td onClick={ e => { handleEditClick(listItem, e) }}>{listItem.unit}</td>
-          <td style={{ width: "60px"}}>
-            <div onClick={e => { handleDeleteClick(listItem, e) }} className="trash-can-item-list"></div>
-          </td>
-        </tr>)
-    }
     return rows
   };
 
@@ -167,10 +149,10 @@ function HomePage() {
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th onClick={() => { handleTableSort("name") }}>{`Item ${sort.catagory === 'name' ? sort.asc ? "↑" : "↓" : " "}`}</th>
-            <th className="item-table-header-added" onClick={() => { handleTableSort("created_date") }}>{`Added ${sort.catagory === 'created_date' ? sort.asc ? "↑" : "↓" : " "}`}</th>
-            <th className="item-table-header-qty" onClick={() => { handleTableSort("quantity") }}>{`Qty ${sort.catagory === 'quantity' ? sort.asc ? "↑" : "↓" : " "}`}</th>
-            <th onClick={() => { handleTableSort("unit") }}>{`Unit ${sort.catagory === 'unit' ? sort.asc ? "↑" : "↓" : " "}`}</th>
+            <th onClick={() => { handleTableSort("name") }}>{`Item ${sort.catagory === 'name' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
+            <th className="item-table-header-added" onClick={() => { handleTableSort("created_date") }}>{`Added ${sort.catagory === 'created_date' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
+            <th className="item-table-header-qty" onClick={() => { handleTableSort("quantity") }}>{`Qty ${sort.catagory === 'quantity' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
+            <th onClick={() => { handleTableSort("unit") }}>{`Unit ${sort.catagory === 'unit' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
             <th></th>
           </tr>
         </thead>
@@ -181,13 +163,8 @@ function HomePage() {
       <EditEntryModel
         show={modalShow}
         item={item}
-        onHide={() => setModalShow(false)}
-      />
-      <Form>
-        <Form.Group>
-          <Form.File label="file input" onChange={e => { parseFile(e) }}/>
-        </Form.Group>
-      </Form>
+        onHide={() => setModalShow(false)} />
+      <Form.File onChange={e => { parseFile(e) }}/>
     </Container>
   );
 }
