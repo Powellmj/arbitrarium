@@ -8,9 +8,6 @@ const ItemSchema = new Schema({
   notes: {
     type: String,
   },
-  expiration: {
-    type: String,
-  },
   quantity: {
     type: String,
   },
@@ -19,6 +16,12 @@ const ItemSchema = new Schema({
   },
   visible: {
     type: Boolean, default: true
+  },
+  expiration: {
+    type: String,
+  },
+  expiration_date: {
+    type: Date,
   },
   created_at:
   {

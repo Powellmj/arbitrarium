@@ -58,7 +58,7 @@ router.get("/show/:itemId", (req, res) => {
 
 router.delete("/:id", (req, res) => {
   const filter = { "_id": `${req.params.id}` };
-  const update = { "visible": false };
+  const update = { visible: false, quantity: "0", notes: "", expiration_date: "" };
   Item.findOneAndUpdate(filter, update, { new: true })
     .then(item => res.json(item))
     .catch(err => res.status(400).json({ unableToUpdate: err }))

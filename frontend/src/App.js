@@ -1,4 +1,4 @@
-import './styles/main.scss';
+import './main.scss';
 import Container from 'react-bootstrap/Container'
 import HomePage from './components/HomePage';
 import React from 'react';

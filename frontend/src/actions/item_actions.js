@@ -74,6 +74,7 @@ export const updateManyItems = updateObj => dispatch => (
 )
 
 export const deleteItem = (itemId, name) => dispatch => {
-  APIUtil.deleteItem(itemId);
-  return dispatch(removeItem(name));
+  APIUtil.deleteItem(itemId).then(response => {
+    dispatch(receiveItem(response.data))
+  });
 }

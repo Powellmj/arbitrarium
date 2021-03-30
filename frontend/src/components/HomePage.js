@@ -3,11 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { Table, Container, Form, FormControl, Button, Navbar, InputGroup } from 'react-bootstrap';
 import EditEntryModel from "./EditEntryModel"
 import { requestAllItems, deleteItem, createManyItems, updateItem } from '../actions/item_actions';
-import NewEntry from './NewEntry';
 import moment from 'moment';
 
 function HomePage() {
-  const [item, setItem] = useState({ name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" });
+  const defaultEntry = { name: "", notes: "", expiration: "0", expiration_date: "", amountLeft: "100", quantity: "1", unit: "" }
+  const [item, setItem] = useState(defaultEntry);
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState({ catagory: "name", asc: 1 });
   const [shakers, setShakers] = useState({});
@@ -17,7 +17,7 @@ function HomePage() {
 
   useEffect(() => {
     dispatch(requestAllItems())
-    setItem({ name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" })
+    setItem(defaultEntry)
   }, [dispatch]);
 
   const handleDeleteClick = (listItem, e) => {
@@ -45,7 +45,7 @@ function HomePage() {
 
   const parseFile = (e) => {
     if (!e) return;
-    let newItem = { name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" }
+    let newItem = { name: "", notes: "", expiration: "0", expiration_date: "", amountLeft: "100", quantity: "1", unit: "" };
     let refinedResultArr = [];
     let nameCheck = /^[a-zA-Z]+/;
     let quantityCheck = /^[\s]*\$[0-9]+.[0-9][0-9] x/g;
@@ -73,7 +73,7 @@ function HomePage() {
           if (quantityCheck.test(lineItem)) {
             newItem.quantity = parseInt(newItem.quantity) * parseInt(lineItem.split(" x ")[1]);
             refinedResultArr.push(newItem);
-            newItem = { name: "", notes: "", expiration: "Nevah Evah", amountLeft: "100", quantity: "1", unit: "" };
+            newItem = { name: "", notes: "", expiration: "0", expiration_date: "", amountLeft: "100", quantity: "1", unit: "" };
           } else if (unitCheck.test(lineItem)) {
             if (lineItem.includes("ct")) {
               newItem.unit = lineItem.split("ct")[1].match(/[0-9]+.+[0-9]+ +[a-zA-Z]+/g) ? lineItem.split("ct")[1].match(/[0-9]+.+[0-9]+ +[a-zA-Z]+/g)[0] : "Individual";
@@ -96,6 +96,11 @@ function HomePage() {
         if (lineItem.name in items) {
           let autoUpdateItem = items[lineItem.name]
           autoUpdateItem.quantity = `${parseInt(autoUpdateItem.quantity) + parseInt(lineItem.quantity)}`;
+          if (parseInt(autoUpdateItem.expiration) > 0) {
+            let exp_date = new Date()
+            exp_date.setDate(exp_date.getDate() + parseInt(autoUpdateItem.expiration || 0))
+            autoUpdateItem.expiration_date = moment(exp_date).format("YYYY-MM-DD")
+          }
           dispatch(updateItem(autoUpdateItem))
         } else {
           newItems.push(lineItem)
@@ -110,24 +115,44 @@ function HomePage() {
     else setSort({ catagory, asc: 1 })
   };
 
+  const timeUntilExp = (listItem) => {
+    if (!listItem.expiration_date) return [undefined, undefined];
+    let targetDate = moment(listItem.expiration_date).format("DD-MM-YYYY").split("-");
+    targetDate = new Date(targetDate[2], targetDate[1] - 1, targetDate[0]);
+    let exp = Math.ceil(Math.abs((new Date() - targetDate) / (24 * 60 * 60 * 1000)))
+    if (new Date() > targetDate) exp = exp * -1
+    if (exp >= 14) return ["fresh", exp];
+    else if (exp >= 7) return ["stale", exp];
+    else if (exp >= 0) return ["spoiled", exp];
+    else return ["rotten", exp];
+  };
+
   const generateItems = () => {
     let rows = [];
     Object.values(items)
       .filter(lineItem => lineItem.visible && lineItem.name.toLowerCase().includes(filter.toLowerCase()))
       .sort((a, b) => {
-        if (isNaN(parseFloat(a[sort.catagory])) && isNaN(parseFloat(b[sort.catagory]))) return a.name.localeCompare(b.name) * sort.asc;
+        if (sort.catagory === "name") return a.name.localeCompare(b.name) * sort.asc;
+        if (sort.catagory === "spoilage") {
+          a.spoilage = timeUntilExp(a)[1]
+          b.spoilage = timeUntilExp(b)[1]
+          if (isNaN(parseFloat(a[sort.catagory])) && isNaN(parseFloat(b[sort.catagory]))) return a.name.localeCompare(b.name);
+          if (isNaN(parseFloat(a[sort.catagory]))) return 1 * sort.asc;
+          if (isNaN(parseFloat(b[sort.catagory]))) return -1 * sort.asc;
+        }
+        if (isNaN(parseFloat(a[sort.catagory])) && isNaN(parseFloat(b[sort.catagory]))) return a.name.localeCompare(b.name);
         if (isNaN(parseFloat(a[sort.catagory]))) return -1 * sort.asc;
         if (isNaN(parseFloat(b[sort.catagory]))) return 1 * sort.asc;
         if (parseFloat(a[sort.catagory]) > (parseFloat(b[sort.catagory]))) return 1 * sort.asc;
         if (parseFloat(b[sort.catagory]) > (parseFloat(a[sort.catagory]))) return -1 * sort.asc })
-      .forEach(listItem => {
+      .forEach((listItem, idx) => {
         rows.push(
-          <tr key={listItem._id}>
+          <tr className={`home-page-exp-color ${timeUntilExp(listItem)[0]} ${idx % 2 !== 0 ? "home-page-odd" : ""}`} key={listItem._id}>
             <td onClick={e => { handleEditClick(listItem, e) }}>{listItem.name}</td>
             <td onClick={e => { handleEditClick(listItem, e) }}>{moment(listItem.created_at).format("MM/DD")}</td>
             <td onClick={e => { handleEditClick(listItem, e) }}>{listItem.quantity}</td>
             <td onClick={e => { handleEditClick(listItem, e) }}>{listItem.unit}</td>
-            <td style={{ width: "60px" }}>
+            <td>
               <div onClick={e => { handleDeleteClick(listItem, e) }} className="trash-can-item-list"></div>
             </td>
           </tr>)
@@ -137,23 +162,23 @@ function HomePage() {
 
   return(
     <Container>
-      <NewEntry />
       <Navbar bg="light" expand="lg">
         <InputGroup>
+          <Button className="add/edit" style={{ marginRight: "10px" }} onClick={e => { handleEditClick(defaultEntry, e) }} variant="primary" size="sm">Add/Edit</Button>
           <FormControl type="text" placeholder="Search" value={filter} onChange={e => { setFilter(e.target.value) }} />
           <InputGroup.Append>
             <Button style={{ backgroundColor: "White", borderColor: "#ced4da", color: "#6c757d" }} onClick={() => { setFilter(" ") }} variant="outline-secondary">clear</Button>
           </InputGroup.Append>
         </InputGroup>
       </Navbar>
-      <Table striped bordered hover responsive>
+      <Table bordered responsive>
         <thead>
           <tr>
             <th onClick={() => { handleTableSort("name") }}>{`Item ${sort.catagory === 'name' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
             <th className="item-table-header-added" onClick={() => { handleTableSort("created_date") }}>{`Added ${sort.catagory === 'created_date' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
             <th className="item-table-header-qty" onClick={() => { handleTableSort("quantity") }}>{`Qty ${sort.catagory === 'quantity' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
             <th onClick={() => { handleTableSort("unit") }}>{`Unit ${sort.catagory === 'unit' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
-            <th></th>
+            <th className="item-table-header-spoilage" onClick={() => { handleTableSort("spoilage") }}>{`Spoilage ${sort.catagory === 'spoilage' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
           </tr>
         </thead>
         <tbody>
@@ -162,7 +187,7 @@ function HomePage() {
       </Table>
       <EditEntryModel
         show={modalShow}
-        item={item}
+        item={{ ...item, expiration_date: moment(item.expiration_date).format("YYYY-MM-DD")}}
         onHide={() => setModalShow(false)} />
       <Form.File onChange={e => { parseFile(e) }}/>
     </Container>

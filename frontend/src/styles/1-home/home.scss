@@ -33,3 +33,29 @@
 .item-table-header-qty {
   min-width: 70px;
 }
+
+.item-table-header-spoilage {
+  min-width: 110px;
+}
+
+
+.home-page-odd.undefined {
+  background-color: white;
+  filter: brightness(94%);
+}
+
+.fresh {
+  background-color: #2ECC40;
+}
+
+.stale {
+  background-color: #FFDC00;
+}
+
+.spoiled {
+  background-color: #FF851B;
+}
+
+.rotten {
+  background-color: #FF4136;
+}
