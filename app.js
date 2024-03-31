@@ -18,6 +18,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const routes = {
 	"/items/": require('./api/routes/items'),
+	"/contacts/": require('./api/routes/contacts'),
 }
 
 const port = process.env.PORT || 5000;

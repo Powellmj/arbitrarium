@@ -44,18 +44,55 @@
   filter: brightness(94%);
 }
 
-.fresh {
-  background-color: #2ECC40;
+.highlightNew {
+  background-color: #9dd8fc;
+  transition: 1s;
 }
 
-.stale {
-  background-color: #FFDC00;
+.textarea-element {
+  max-width: 300px !important;
+  min-height: 17px !important;
+  max-height: 150px !important;
+  height: fit-content !important;
+  overflow-x: hidden;
 }
 
-.spoiled {
-  background-color: #FF851B;
+.alert-text {
+  width: fit-content;
 }
 
-.rotten {
-  background-color: #FF4136;
+.alert-container {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  margin: auto;
+  width: 100%;
+  top: 50px;
+}
+
+.item-column {
+  min-width: 250px;
+}
+
+.item-column {
+  min-width: 230px;
+}
+
+.fade-in {
+	opacity: 1;
+  transition: 1s;
+}
+
+.fade-out {
+	opacity: 0;
+	transition: 1s;
+	animation-duration: 2s;
+}
+
+.table-text-input {
+  background-color: inherit !important;
+}
+
+.table-row {
+  transition: 1s;
 }
