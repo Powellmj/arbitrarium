@@ -71,7 +71,7 @@
 }
 
 .item-column {
-  min-width: 250px;
+
 }
 
 .item-column {
@@ -95,4 +95,20 @@
 
 .table-row {
   transition: 1s;
+}
+
+.hostname {
+  min-width: 220px;
+}
+
+.ip-address {
+  min-width: 175px;
+}
+
+.mac-address {
+  min-width: 200px;
+}
+
+.description {
+  min-width: 125px;
 }

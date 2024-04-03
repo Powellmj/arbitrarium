@@ -34,7 +34,7 @@ function HomePage() {
                 newElement.classList.remove('highlightNew')
             }, 1500)
             newElement.classList.add('highlightNew')
-            window.scrollTo({ top: newElement.offsetTop, behavior: 'smooth'});
+            window.scrollTo({ top: newElement.offsetTop, behavior: 'smooth' });
             // setNewItemId('')
         }
     }
@@ -136,16 +136,34 @@ function HomePage() {
                 rows.push(
                     <tr key={listItem._id} id={listItem._id} className='table-row'>
                         <td onClick={e => { handleEditClick(listItem, e) }}>
-                            <input type="text" className="form-control table-text-input" value={listItem.hostname} onChange={e => { update(e, "hostname", listItem) }} />
+                            <input
+                                type="text"
+                                className="form-control table-text-input"
+                                value={listItem.hostname}
+                                onChange={e => { update(e, "hostname", listItem) }}
+                                id="hostname"
+                            />
                         </td>
                         <td onClick={e => { handleEditClick(listItem, e) }}>
-                            <input type="text" className="form-control table-text-input" value={listItem.ip_address} onChange={e => { update(e, "ip_address", listItem) }} />
+                            <input 
+                            type="text" 
+                            id="ip_address" 
+                            className="form-control table-text-input" 
+                            value={listItem.ip_address} onChange={e => { update(e, "ip_address", listItem) }} />
                         </td>
                         <td onClick={e => { handleEditClick(listItem, e) }}>
-                            <input type="text" className="form-control table-text-input" value={listItem.mac_address} onChange={e => { update(e, "mac_address", listItem) }} />
+                            <input 
+                            type="text" 
+                            id="mac_address" 
+                            className="form-control table-text-input" 
+                            value={listItem.mac_address} onChange={e => { update(e, "mac_address", listItem) }} />
                         </td>
                         <td onClick={e => { handleEditClick(listItem, e) }}>
-                            <textarea className="form-control textarea-element table-text-input" value={listItem.description} onChange={e => { update(e, "description", listItem) }} />
+                            <input 
+                            type="text" 
+                            id="description" 
+                            className="form-control textarea-element table-text-input" 
+                            value={listItem.description} onChange={e => { update(e, "description", listItem) }} />
                         </td>
                         <td>
                             <div onClick={e => { handleDeleteClick(listItem, e) }} className="trash-can-item-list"></div>
@@ -157,7 +175,7 @@ function HomePage() {
 
     return (
         <Container style={{ margin: '0px', padding: '0px', minWidth: '100%', display: 'flex', justifyContent: 'center' }}>
-            <Navbar style={{position: 'fixed', width: '100vw'}} bg="light" expand="lg">
+            <Navbar style={{ position: 'fixed', width: '100vw' }} bg="light" expand="lg">
                 <InputGroup>
                     <Button className="add/edit" style={{ marginRight: "10px" }} onClick={e => { handleEditClick(defaultEntry, e) }} variant="primary" size="sm">Add Entry</Button>
                     <FormControl type="text" placeholder="Search" value={filter} onChange={e => { setFilter(e.target.value) }} />
@@ -172,13 +190,13 @@ function HomePage() {
                 </div> : null}
             </Navbar>
 
-            <Table style={{marginTop: '55px'}} bordered responsive>
+            <Table style={{ marginTop: '55px' }} bordered responsive>
                 <thead>
                     <tr>
-                        <th className="item-column" onClick={() => { handleTableSort("hostname") }}>{`Hostname ${sort.catagory === 'hostname' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
-                        <th className="item-table-header-added item-column" onClick={() => { handleTableSort("ipAddress") }}>{`IP Address ${sort.catagory === 'ipAddress' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
-                        <th className="item-table-header-qty item-column" onClick={() => { handleTableSort("macAddress") }}>{`MAC Address ${sort.catagory === 'macAddress' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
-                        <th className="item-column" onClick={() => { handleTableSort("description") }}>{`Description ${sort.catagory === 'description' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
+                        <th className="item-column hostname" onClick={() => { handleTableSort("hostname") }}>{`Hostname ${sort.catagory === 'hostname' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
+                        <th className="item-table-header-added item-column ip-address" onClick={() => { handleTableSort("ipAddress") }}>{`IP Address ${sort.catagory === 'ipAddress' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
+                        <th className="item-table-header-qty item-column mac-address" onClick={() => { handleTableSort("macAddress") }}>{`MAC Address ${sort.catagory === 'macAddress' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
+                        <th className="item-column description" onClick={() => { handleTableSort("description") }}>{`Description ${sort.catagory === 'description' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
                         <th></th>
                     </tr>
                 </thead>
