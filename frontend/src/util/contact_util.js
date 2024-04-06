@@ -20,6 +20,10 @@ export const fetchAllItems = () => {
   return axios.get(`/contacts/index/`);
 };
 
+export const pushConfig = () => {
+  return axios.post(`/contacts/push-config/`);
+};
+
 export const fetchItem = itemId => {
   return axios.get(`/contacts/show/${itemId}`);
 };

@@ -33,6 +33,15 @@ export const requestAllItems = () => dispatch => APIUtil.fetchAllItems()
     return dispatch(receiveAllItems(itemsObj))
   })
 
+  export const pushConfig = () => dispatch => APIUtil.pushConfig()
+  .then(items => {
+    let itemsObj = {}
+    items.data.forEach(item => {
+      itemsObj[item._id] = item
+    })
+    return dispatch(receiveAllItems(itemsObj))
+  })
+
 export const createItem = item => dispatch => (
   APIUtil.createItem(item).then((response) => {
     return dispatch(receiveItem(response.data))

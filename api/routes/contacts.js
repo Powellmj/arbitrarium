@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Contact = require('../models/Contact');
+const { PowerShell } = require('node-powershell');
+const path = require('path')
 
 router.post("/", (req, res) => {
     const newItem = new Contact({
@@ -37,6 +39,27 @@ router.patch("/index/", (req, res) => {
 router.get("/index/", (req, res) => {
   Contact.find()
     .then(items => res.json(items))
+    .catch(err => res.status(404).json({ noItemsFound: err }))
+});
+
+router.post("/push-config/", (req, res) => {
+  Contact.find()
+    .then(async items => {
+      let ps = new PowerShell({
+        executionPolicy: 'Bypass',
+        noProfile: true,
+      })
+      try {
+        const pushConfigCommand = PowerShell.command`. ./scripts/pushConfig.ps1 -jsonObject ${JSON.stringify(items)}`;
+
+        await ps.invoke(pushConfigCommand);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        await ps.dispose();
+      }
+      return res.json(items)
+    })
     .catch(err => res.status(404).json({ noItemsFound: err }))
 });
 

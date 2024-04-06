@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Table, Container, FormControl, Button, Navbar, InputGroup } from 'react-bootstrap';
 import EditItemModal from "./EditItemModel"
-import { requestAllItems, deleteItem, updateItemIndex } from '../actions/contacts_actions';
+import { requestAllItems, deleteItem, updateItemIndex, pushConfig } from '../actions/contacts_actions';
 
 function HomePage() {
     const defaultEntry = { hostname: "", ip_address: "192.168.", mac_address: "", description: "" }
@@ -38,6 +38,15 @@ function HomePage() {
             // setNewItemId('')
         }
     }
+
+    const setPlaceHolder = () => {
+        const options = ["Hello, sunshine!", "Howdy, partner!", "Hey, hi, hello!", "What’s kickin’, little chicken?", "Peek-a-boo!", "Howdy-doody!", "Hey there, freshman!", "My name's Ralph, and I'm a bad guy.", "Welcome!", "I come in peace!", "Put that cookie down!", "Ahoy, matey!", "Hiya!", "'Ello, gov'nor!", "Top of the mornin’ to ya!", "What’s crackin’?", "GOOOOOD MORNING, VIETNAM!", "Howdy, howdy, howdy!", "Hello, my name is Inigo Montoya.", "I'm Batman.", "So, at last, we meet for the first time, for the last time!", "Here's Johnny!", "Ghostbusters, whatya want?", "Yo!", "Whaddup.", "Greetings and salutations!", "Doctor.", "‘Ello, mate.", "Oh, yoooouhoooo!", "How you doin'?", "I like your face.", "What's cookin', good lookin'?", "Why, hello there!", "Hey, boo.", "Listen!", "Generic Greeting!"]
+        return options[Math.floor(Math.random() * options.length)]
+      }
+
+    const handlePushConfig = () => {
+        dispatch(pushConfig())
+      }
 
     const update = (e, field, listItem) => {
         listItem[field] = e.target.value
@@ -178,9 +187,9 @@ function HomePage() {
             <Navbar style={{ position: 'fixed', width: '100vw' }} bg="light" expand="lg">
                 <InputGroup>
                     <Button className="add/edit" style={{ marginRight: "10px" }} onClick={e => { handleEditClick(defaultEntry, e) }} variant="primary" size="sm">Add Entry</Button>
-                    <FormControl type="text" placeholder="Search" value={filter} onChange={e => { setFilter(e.target.value) }} />
+                    <FormControl type="text" placeholder={setPlaceHolder()} value={filter} onChange={e => { setFilter(e.target.value) }} />
                     <InputGroup.Append>
-                        <Button style={{ backgroundColor: "White", borderColor: "#ced4da", color: "#6c757d" }} onClick={() => { setFilter("") }} variant="outline-secondary">clear</Button>
+                        <Button onClick={() => { handlePushConfig() }} variant="info">Push Config</Button>
                     </InputGroup.Append>
                 </InputGroup>
                 {saveTimeout ? <div className={`alert-container ${saved ? 'fade-in' : 'fade-out'}`}>
