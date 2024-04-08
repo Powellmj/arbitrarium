@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Table, Container, Form, FormControl, Button, Navbar, InputGroup } from 'react-bootstrap';
 import EditEntryModel from "./EditEntryModel"
-import { requestAllItems, deleteItem, createManyItems, updateItem } from '../actions/item_actions';
+import { requestAllItems, deleteItem, createManyItems, updateItem } from '../../actions/item_actions';
 import moment from 'moment';
 
 function HomePage() {

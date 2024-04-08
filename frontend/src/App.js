@@ -1,6 +1,6 @@
 import './main.scss';
 import Container from 'react-bootstrap/Container'
-import HomePage from './components/TablePage';
+import HomePage from './pages/HomePage/HomePage';
 import React from 'react';
 
 function App() {

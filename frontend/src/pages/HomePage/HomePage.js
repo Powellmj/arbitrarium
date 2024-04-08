@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Table, Container, FormControl, Button, Navbar, InputGroup } from 'react-bootstrap';
-import EditItemModal from "./EditItemModel"
-import { requestAllItems, deleteItem, updateItemIndex, pushConfig } from '../actions/contacts_actions';
+import EditItemModal from "../../components/EditIEntryModal/EditEntryModal"
+import Banner from '../../components/Banner/Banner'
+import { requestAllItems, deleteItem, updateItemIndex, pushConfig } from '../../actions/contacts_actions';
 
 function HomePage() {
     const defaultEntry = { hostname: "", ip_address: "192.168.", mac_address: "", description: "" }
@@ -39,16 +40,6 @@ function HomePage() {
         }
     }
 
-    const setPlaceHolder = () => {
-        const options = ["Hello, sunshine!", "Howdy, partner!", "Hey, hi, hello!", "What’s kickin’, little chicken?", "Peek-a-boo!", "Howdy-doody!", "Hey there, freshman!", "My name's Ralph, and I'm a bad guy.", "Welcome!", "I come in peace!", "Put that cookie down!", "Ahoy, matey!", "Hiya!", "'Ello, gov'nor!", "Top of the mornin’ to ya!", "What’s crackin’?", "GOOOOOD MORNING, VIETNAM!", "Howdy, howdy, howdy!", "Hello, my name is Inigo Montoya.", "I'm Batman.", "So, at last, we meet for the first time, for the last time!", "Here's Johnny!", "Ghostbusters, whatya want?", "Yo!", "Whaddup.", "Greetings and salutations!", "Doctor.", "‘Ello, mate.", "Oh, yoooouhoooo!", "How you doin'?", "I like your face.", "What's cookin', good lookin'?", "Why, hello there!", "Hey, boo.", "Listen!", "Generic Greeting!"]
-        return options[Math.floor(Math.random() * options.length)]
-      }
-      const placeholder = useMemo(() => setPlaceHolder(), []);
-
-    const handlePushConfig = () => {
-        dispatch(pushConfig())
-      }
-
     const update = (e, field, listItem) => {
         listItem[field] = e.target.value
 
@@ -64,6 +55,7 @@ function HomePage() {
         setSaveTimeout(window.setTimeout(() => {
             dispatch(updateItemIndex(listItem))
             setSaved(false)
+            setSaveTimeout(false)
         }, 2500))
     };
 
@@ -183,22 +175,17 @@ function HomePage() {
         return rows
     };
 
+    const placeholder = useMemo(() => generateItems(), [items]);
+
+
     return (
         <Container style={{ margin: '0px', padding: '0px', minWidth: '100%', display: 'flex', justifyContent: 'center' }}>
-            <Navbar style={{ position: 'fixed', width: '100vw' }} bg="light" expand="lg">
-                <InputGroup>
-                    <Button className="add/edit" style={{ marginRight: "10px" }} onClick={e => { handleEditClick(defaultEntry, e) }} variant="primary" size="sm">Add Entry</Button>
-                    <FormControl type="text" placeholder={placeholder} value={filter} onChange={e => { setFilter(e.target.value) }} />
-                    <InputGroup.Append>
-                        <Button onClick={() => { handlePushConfig() }} variant="info">Push Config</Button>
-                    </InputGroup.Append>
-                </InputGroup>
+            <Banner filter={filter} setFilter={setFilter} setModalShow={setModalShow}/>
                 {saveTimeout ? <div className={`alert-container ${saved ? 'fade-in' : 'fade-out'}`}>
                     <div className="alert alert-primary alert-text" role="alert">
                         Saved!
                     </div>
                 </div> : null}
-            </Navbar>
 
             <Table style={{ marginTop: '55px' }} bordered responsive>
                 <thead>

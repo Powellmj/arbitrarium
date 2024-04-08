@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { createItem, updateItem } from '../actions/item_actions';
+import { createItem, updateItem } from '../../actions/item_actions';
 import { Modal, Button, Form, Col, Popover, OverlayTrigger, Table, InputGroup  } from 'react-bootstrap';
 import moment from 'moment';
 

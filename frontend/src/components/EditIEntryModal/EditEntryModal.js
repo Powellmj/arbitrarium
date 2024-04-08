@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { createItem, updateItem } from '../actions/contacts_actions';
+import { createItem, updateItem } from '../../actions/contacts_actions';
 import { Modal, Button, Form, Col } from 'react-bootstrap';
 
 function EditEntryModal(props) {
-  const defaultEntry = { hostname: "", ip_address: "192.168.", mac_address: "", description: ""}
+  const defaultEntry = { hostname: "", ip_address: "192.168.", mac_address: "", description: "" }
   const [entry, setEntry] = useState(defaultEntry);
   const dispatch = useDispatch();
   const items = useSelector(state => state.entities.contacts)
+  const [hostnameMatch, setHostnameMatch] = useState(false);
+  const [ipMatch, setIpMatch] = useState(false);
+  const [macMatch, setMacMatch] = useState(false);
+  const [saveTimeout, setSaveTimeout] = useState(false);
+  const [timer, setTimer] = useState({});
 
   useEffect(() => {
     if (document.getElementById("hostname-field")) {
@@ -21,13 +26,31 @@ function EditEntryModal(props) {
   };
 
   const handleSubmit = (e) => {
-    let entryId = ""
-    dispatch(createItem(entry)).then((res) => {
-      entryId = res?.item?._id
-      handleClear()
-      props.setNewItemId(entryId)
-    })
-    props.onHide()
+    console.log(items, entry)
+
+    if (!Object.values(items).some(item => {
+      let validationFailure = false;
+        if (item.hostname === entry.hostname) {
+          setHostnameMatch('hostname')
+          validationFailure = true;
+        } else if (item.ip_address === entry.ip_address) {
+          setIpMatch('ip_address')
+          validationFailure = true;
+        } else if (item.mac_address === entry.mac_address) {
+          setMacMatch('mac_address')
+          validationFailure = true;
+        }
+        return validationFailure;
+    }
+    )) {
+      let entryId = ""
+      dispatch(createItem(entry)).then((res) => {
+        entryId = res?.item?._id
+        handleClear()
+        props.setNewItemId(entryId)
+      })
+      props.onHide()
+    }
   };
 
   const handleEdit = (e) => {
@@ -55,24 +78,29 @@ function EditEntryModal(props) {
         <Modal.Title id="contained-modal-title-vcenter">
           Create/Edit Entry
         </Modal.Title>
+        {saveTimeout ? <div className={`alert-container ${!!alert ? 'fade-in' : 'fade-out'}`}>
+          <div className="alert alert-primary alert-text" role="alert">
+            {alert}
+          </div>
+        </div> : null}
       </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group as={Col}>
             <Form.Label>Hostname</Form.Label>
-              <Form.Control id="hostname-field" value={entry.hostname} onChange={e => { update(e, "hostname") }} />
+            <Form.Control id="hostname-field" value={entry.hostname} onChange={e => { update(e, "hostname") }} />
           </Form.Group>
           <Form.Group as={Col}>
             <Form.Label>IP Address</Form.Label>
-              <Form.Control value={entry.ip_address} onChange={e => { update(e, "ip_address") }} />
+            <Form.Control value={entry.ip_address} onChange={e => { update(e, "ip_address") }} />
           </Form.Group>
           <Form.Group as={Col}>
             <Form.Label>MAC Address</Form.Label>
-              <Form.Control value={entry.mac_address} onChange={e => { update(e, "mac_address") }} />
+            <Form.Control value={entry.mac_address} onChange={e => { update(e, "mac_address") }} />
           </Form.Group>
           <Form.Group as={Col}>
             <Form.Label>Description</Form.Label>
-            <Form.Control as="textarea" rows={3} value={entry.description} onChange={e => { update(e, "description") }}/>
+            <Form.Control as="textarea" rows={3} value={entry.description} onChange={e => { update(e, "description") }} />
           </Form.Group>
         </Form>
       </Modal.Body>
@@ -80,9 +108,9 @@ function EditEntryModal(props) {
         {/* <Button variant="danger" type="reset" onClick={() => { handleClear() }}>Clear</Button> */}
         {entry._id in items ?
           <Button
-          variant="primary"
-          type="submit" style={{ minWidth: "150px" }}
-          onClick={() => { handleEdit() }}>
+            variant="primary"
+            type="submit" style={{ minWidth: "150px" }}
+            onClick={() => { handleEdit() }}>
             Edit
           </Button> :
           <Button variant="primary" type="submit" style={{ minWidth: "150px" }} onClick={() => { handleSubmit() }}>Submit</Button>
