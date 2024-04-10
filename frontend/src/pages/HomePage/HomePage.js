@@ -15,7 +15,10 @@ function HomePage() {
     const [modalShow, setModalShow] = useState(false);
     const [saved, setSaved] = useState(false);
     const [saveTimeout, setSaveTimeout] = useState(false);
-    const [newItemId, setNewItemId] = useState("");
+    const [hostnameMatch, setHostnameMatch] = useState(false);
+    const [ipMatch, setIpMatch] = useState('');
+    const [macMatch, setMacMatch] = useState('');
+    const [newItemId, setNewItemId] = useState('');
     const items = useSelector(state => state.entities.contacts)
     const dispatch = useDispatch();
 
@@ -42,21 +45,89 @@ function HomePage() {
 
     const update = (e, field, listItem) => {
         listItem[field] = e.target.value
-
-        if (timer) {
-            clearTimeout(timer);
-            clearTimeout(saveTimeout)
+        if (!Object.values(items)
+            .filter((entity) => {
+                return !(entity.hostname === listItem.hostname &&
+                    entity.ip_address === listItem.ip_address &&
+                    entity.mac_address === listItem.mac_address
+                    )
+            })
+            .some(entity => {
+                if (entity.hostname === listItem.hostname && e.target.id.includes('hostname')) {
+                    e.target.classList.add('form-input')
+                    document.getElementById(`${entity._id} hostname`).classList.add('form-input')
+                    setHostnameMatch(entity._id)
+                    return true;
+                }
+            })) {
+                if (e.target.id.includes('hostname')) {
+                if (document.getElementById(`${hostnameMatch} hostname`)) {
+                    document.getElementById(`${hostnameMatch} hostname`).classList.remove('form-input')
+                }
+                e.target.classList.remove('form-input')
+            }
         }
-        setTimer(window.setTimeout(() => {
-            dispatch(updateItemIndex(listItem))
-            setSaved(true)
-        }, 1000))
+        if (!Object.values(items)
+            .filter((entity) => {
+                return !(entity.hostname === listItem.hostname &&
+                    entity.ip_address === listItem.ip_address &&
+                    entity.mac_address === listItem.mac_address
+                    
+                    )
+            })
+            .some(entity => {
+                if (entity.ip_address === listItem.ip_address && e.target.id.includes('ip_address')) {
+                    e.target.classList.add('form-input')
+                    document.getElementById(`${entity._id} ip_address`).classList.add('form-input')
+                    setIpMatch(entity._id)
+                    return true;
+                }
+            })) {
+                if (e.target.id.includes('ip_address')) {
+                    e.target.classList.remove('form-input')
+                    if (document.getElementById(`${ipMatch} ip_address`)) {
+                        document.getElementById(`${ipMatch} ip_address`).classList.remove('form-input')
+                    }
+            }
+        }
+        if (!Object.values(items)
+            .filter((entity) => {
+                return !(entity.hostname === listItem.hostname &&
+                    entity.ip_address === listItem.ip_address &&
+                    entity.mac_address === listItem.mac_address)
+            })
+            .some(entity => {
+                if (entity.mac_address === listItem.mac_address && e.target.id.includes('mac_address')) {
+                    e.target.classList.add('form-input')
+                    document.getElementById(`${entity._id} mac_address`).classList.add('form-input')
+                    setMacMatch(entity._id)
+                    return true;
+                }
+            })) {
+                if (e.target.id.includes('mac_address')) {
+                    e.target.classList.remove('form-input')
+                    if (document.getElementById(`${macMatch} mac_address`)) {
+                        document.getElementById(`${macMatch} mac_address`).classList.remove('form-input')
+                    }
+            }
+        }
 
-        setSaveTimeout(window.setTimeout(() => {
-            dispatch(updateItemIndex(listItem))
-            setSaved(false)
-            setSaveTimeout(false)
-        }, 2500))
+        if (true) {
+            if (timer) {
+                clearTimeout(timer);
+                clearTimeout(saveTimeout)
+            }
+            setTimer(window.setTimeout(() => {
+                dispatch(updateItemIndex(listItem))
+                setSaved(true)
+            }, 1000))
+
+            setSaveTimeout(window.setTimeout(() => {
+                dispatch(updateItemIndex(listItem))
+                setSaved(false)
+                setSaveTimeout(false)
+            }, 2500))
+        }
     };
 
     const handleDeleteClick = (listItem, e) => {
@@ -143,29 +214,29 @@ function HomePage() {
                                 className="form-control table-text-input"
                                 value={listItem.hostname}
                                 onChange={e => { update(e, "hostname", listItem) }}
-                                id="hostname"
+                                id={`${listItem._id} hostname`}
                             />
                         </td>
                         <td onClick={e => { handleEditClick(listItem, e) }}>
-                            <input 
-                            type="text" 
-                            id="ip_address" 
-                            className="form-control table-text-input" 
-                            value={listItem.ip_address} onChange={e => { update(e, "ip_address", listItem) }} />
+                            <input
+                                type="text"
+                                id={`${listItem._id} ip_address`}
+                                className="form-control table-text-input"
+                                value={listItem.ip_address} onChange={e => { update(e, "ip_address", listItem) }} />
                         </td>
                         <td onClick={e => { handleEditClick(listItem, e) }}>
-                            <input 
-                            type="text" 
-                            id="mac_address" 
-                            className="form-control table-text-input" 
-                            value={listItem.mac_address} onChange={e => { update(e, "mac_address", listItem) }} />
+                            <input
+                                type="text"
+                                id={`${listItem._id} mac_address`}
+                                className="form-control table-text-input"
+                                value={listItem.mac_address} onChange={e => { update(e, "mac_address", listItem) }} />
                         </td>
                         <td onClick={e => { handleEditClick(listItem, e) }}>
-                            <input 
-                            type="text" 
-                            id="description" 
-                            className="form-control textarea-element table-text-input" 
-                            value={listItem.description} onChange={e => { update(e, "description", listItem) }} />
+                            <input
+                                type="text"
+                                id="description"
+                                className="form-control textarea-element table-text-input"
+                                value={listItem.description} onChange={e => { update(e, "description", listItem) }} />
                         </td>
                         <td>
                             <div onClick={e => { handleDeleteClick(listItem, e) }} className="trash-can-item-list"></div>
@@ -175,17 +246,17 @@ function HomePage() {
         return rows
     };
 
-    const placeholder = useMemo(() => generateItems(), [items]);
+    const generatedItems = useMemo(() => generateItems(), []);
 
 
     return (
         <Container style={{ margin: '0px', padding: '0px', minWidth: '100%', display: 'flex', justifyContent: 'center' }}>
-            <Banner filter={filter} setFilter={setFilter} setModalShow={setModalShow}/>
-                {saveTimeout ? <div className={`alert-container ${saved ? 'fade-in' : 'fade-out'}`}>
-                    <div className="alert alert-primary alert-text" role="alert">
-                        Saved!
-                    </div>
-                </div> : null}
+            <Banner filter={filter} setFilter={setFilter} setModalShow={setModalShow} />
+            {saveTimeout ? <div className={`alert-container ${saved ? 'fade-in' : 'fade-out'}`}>
+                <div className="alert alert-primary alert-text" role="alert">
+                    Saved!
+                </div>
+            </div> : null}
 
             <Table style={{ marginTop: '55px' }} bordered responsive>
                 <thead>
