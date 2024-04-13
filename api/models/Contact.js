@@ -4,14 +4,20 @@ const Schema = mongoose.Schema;
 const ContactSchema = new Schema({
   hostname: {
     type: String,
+    unique: true,
+    dropDups: true,
     default: ''
   },
   ip_address: {
     type: String,
+    unique: true,
+    dropDups: true,
     default: ''
   },
   mac_address: {
     type: String,
+    unique: true,
+    dropDups: true,
     default: ''
   },
   description: {

@@ -64,14 +64,8 @@
 .alert-container {
   display: flex;
   justify-content: center;
-  position: absolute;
-  margin: auto;
-  width: 100%;
-  top: 50px;
-}
-
-.item-column {
-
+  position: fixed;
+  top: 40px;
 }
 
 .item-column {
@@ -114,6 +108,27 @@
   color: red;
 }
 
-.form-input {
+.duplicate-entry-hostname {
   background-color: rgb(249, 224, 227) !important;
+}
+.duplicate-entry-ip_address {
+  background-color: rgb(249, 224, 227) !important;
+}
+.duplicate-entry-mac_address {
+  background-color: rgb(249, 224, 227) !important;
+}
+
+.duplicate-entry {
+  background-color: rgb(249, 224, 227) !important;
+}
+
+.jump-to-button {
+  margin-left: 10px;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  padding: 5px !important;
+  margin-bottom: 0 !important;
 }

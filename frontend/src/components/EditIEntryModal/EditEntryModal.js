@@ -128,7 +128,7 @@ function EditEntryModal(props) {
         <Form>
           <Form.Group as={Col}>
             <Form.Label>Hostname</Form.Label>
-            <Form.Control id="hostname-field" className={hostnameMatch ? 'form-input' : ''} value={entry.hostname} onChange={e => { update(e, "hostname") }} />
+            <Form.Control id="hostname-field" className={hostnameMatch ? 'form-input duplicate-entry' : ''} value={entry.hostname} onChange={e => { update(e, "hostname") }} />
             {hostnameMatch ? <div>
               <div className='validation-label'>
                 -Hostname matches another entry
@@ -137,7 +137,7 @@ function EditEntryModal(props) {
           </Form.Group>
           <Form.Group as={Col}>
             <Form.Label>IP Address</Form.Label>
-            <Form.Control className={ipMatch ? 'form-input' : ''} value={entry.ip_address} onChange={e => { update(e, "ip_address") }} />
+            <Form.Control className={ipMatch ? 'form-input duplicate-entry' : ''} value={entry.ip_address} onChange={e => { update(e, "ip_address") }} />
             {ipMatch ? <div className='validation-label'>
               <div>
                 -IP matches another entry
@@ -146,7 +146,7 @@ function EditEntryModal(props) {
           </Form.Group>
           <Form.Group as={Col}>
             <Form.Label>MAC Address</Form.Label>
-            <Form.Control className={macMatch ? 'form-input' : ''} value={entry.mac_address} onChange={e => { update(e, "mac_address") }} />
+            <Form.Control className={macMatch ? 'form-input duplicate-entry' : ''} value={entry.mac_address} onChange={e => { update(e, "mac_address") }} />
             {macMatch ? <div className='validation-label'>
               <div>
                 -MAC address matches another entry
@@ -160,7 +160,7 @@ function EditEntryModal(props) {
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        {/* <Button variant="danger" type="reset" onClick={() => { handleClear() }}>Clear</Button> */}
+        <Button variant="danger" type="reset" onClick={() => { handleClear() }}>Clear</Button>
         {entry._id in items ?
           <Button
             variant="primary"

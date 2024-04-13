@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { Table, Container, FormControl, Button, Navbar, InputGroup } from 'react-bootstrap';
+import { Table, Container, FormControl, Button, Navbar, InputGroup, Alert } from 'react-bootstrap';
 import EditItemModal from "../../components/EditIEntryModal/EditEntryModal"
 import Banner from '../../components/Banner/Banner'
 import { requestAllItems, deleteItem, updateItemIndex, pushConfig } from '../../actions/contacts_actions';
+import TableRow from '../../components/TableRow/TableRow'
 
 function HomePage() {
     const defaultEntry = { hostname: "", ip_address: "192.168.", mac_address: "", description: "" }
@@ -15,9 +16,7 @@ function HomePage() {
     const [modalShow, setModalShow] = useState(false);
     const [saved, setSaved] = useState(false);
     const [saveTimeout, setSaveTimeout] = useState(false);
-    const [hostnameMatch, setHostnameMatch] = useState(false);
-    const [ipMatch, setIpMatch] = useState('');
-    const [macMatch, setMacMatch] = useState('');
+    const [error, setError] = useState(false);
     const [newItemId, setNewItemId] = useState('');
     const items = useSelector(state => state.entities.contacts)
     const dispatch = useDispatch();
@@ -25,7 +24,12 @@ function HomePage() {
     useEffect(() => {
         dispatch(requestAllItems())
         setItem(defaultEntry)
+        checkMatches()
     }, [dispatch]);
+
+    useEffect(() => {
+        checkMatches()
+    }, [items]);
 
     useEffect(() => {
         highlightChanged(newItemId)
@@ -38,80 +42,59 @@ function HomePage() {
                 newElement.classList.remove('highlightNew')
             }, 1500)
             newElement.classList.add('highlightNew')
-            window.scrollTo({ top: newElement.offsetTop, behavior: 'smooth' });
-            // setNewItemId('')
+            window.scrollTo({ top: `${newElement.offsetTop - 100}`, behavior: 'smooth' });
         }
+    }
+
+    const onJumpClick = () => {
+        let invalidEntry
+        let duplicate
+        ['hostname', 'ip_address', 'mac_address'].map(field => {
+            invalidEntry = document.querySelector(`.duplicate-entry-${field}`).parentElement.parentElement
+            if (invalidEntry && !duplicate) {
+                handleTableSort(`${field}`)
+                duplicate = true;
+                setTimeout(() => { 
+                    window.scrollTo({ top: `${invalidEntry.offsetTop - 100}`, behavior: 'smooth' }) 
+                }, 1);
+            }
+        })
+    }
+
+    const checkMatches = () => {
+        let duplicates = false;
+        let dupes = { hostname: {}, ip_address: {}, mac_address: {} }
+
+        Object.values(items)
+            .map((listItem2) => {
+                ['hostname', 'ip_address', 'mac_address'].map(field => {
+                    if (Object.keys(dupes[field]).includes(listItem2.[field])) {
+                        if (document.getElementById(`${listItem2._id} ${[field]}`)) {
+                            document.getElementById(`${listItem2._id} ${[field]}`).classList.add(`duplicate-entry-${field}`)
+                        }
+                        if (document.getElementById(`${dupes[field][listItem2.[field]][0]._id} ${[field]}`)) {
+                            document.getElementById(`${dupes[field][listItem2.[field]][0]._id} ${[field]}`).classList.add(`duplicate-entry-${field}`)
+                        }
+                        dupes[field][listItem2[field]].push(listItem2)
+                        duplicates = true;
+                    } else {
+                        dupes[field][listItem2[field]] = [listItem2]
+                        if (document.getElementById(`${listItem2._id} ${[field]}`)) {
+                            document.getElementById(`${listItem2._id} ${[field]}`).classList.remove(`duplicate-entry-${field}`)
+                        }
+                        if (document.getElementById(`${dupes[field][listItem2.[field]][0]._id} ${[field]}`)) {
+                            document.getElementById(`${dupes[field][listItem2.[field]][0]._id} ${[field]}`).classList.remove(`duplicate-entry-${field}`)
+                        }
+                    }
+                })
+            })
+        setError(duplicates);
+        return duplicates;
     }
 
     const update = (e, field, listItem) => {
         listItem[field] = e.target.value
-        if (!Object.values(items)
-            .filter((entity) => {
-                return !(entity.hostname === listItem.hostname &&
-                    entity.ip_address === listItem.ip_address &&
-                    entity.mac_address === listItem.mac_address
-                    )
-            })
-            .some(entity => {
-                if (entity.hostname === listItem.hostname && e.target.id.includes('hostname')) {
-                    e.target.classList.add('form-input')
-                    document.getElementById(`${entity._id} hostname`).classList.add('form-input')
-                    setHostnameMatch(entity._id)
-                    return true;
-                }
-            })) {
-                if (e.target.id.includes('hostname')) {
-                if (document.getElementById(`${hostnameMatch} hostname`)) {
-                    document.getElementById(`${hostnameMatch} hostname`).classList.remove('form-input')
-                }
-                e.target.classList.remove('form-input')
-            }
-        }
-        if (!Object.values(items)
-            .filter((entity) => {
-                return !(entity.hostname === listItem.hostname &&
-                    entity.ip_address === listItem.ip_address &&
-                    entity.mac_address === listItem.mac_address
-                    
-                    )
-            })
-            .some(entity => {
-                if (entity.ip_address === listItem.ip_address && e.target.id.includes('ip_address')) {
-                    e.target.classList.add('form-input')
-                    document.getElementById(`${entity._id} ip_address`).classList.add('form-input')
-                    setIpMatch(entity._id)
-                    return true;
-                }
-            })) {
-                if (e.target.id.includes('ip_address')) {
-                    e.target.classList.remove('form-input')
-                    if (document.getElementById(`${ipMatch} ip_address`)) {
-                        document.getElementById(`${ipMatch} ip_address`).classList.remove('form-input')
-                    }
-            }
-        }
-        if (!Object.values(items)
-            .filter((entity) => {
-                return !(entity.hostname === listItem.hostname &&
-                    entity.ip_address === listItem.ip_address &&
-                    entity.mac_address === listItem.mac_address)
-            })
-            .some(entity => {
-                if (entity.mac_address === listItem.mac_address && e.target.id.includes('mac_address')) {
-                    e.target.classList.add('form-input')
-                    document.getElementById(`${entity._id} mac_address`).classList.add('form-input')
-                    setMacMatch(entity._id)
-                    return true;
-                }
-            })) {
-                if (e.target.id.includes('mac_address')) {
-                    e.target.classList.remove('form-input')
-                    if (document.getElementById(`${macMatch} mac_address`)) {
-                        document.getElementById(`${macMatch} mac_address`).classList.remove('form-input')
-                    }
-            }
-        }
-
+        let invalidInput = checkMatches()
         if (true) {
             if (timer) {
                 clearTimeout(timer);
@@ -123,10 +106,12 @@ function HomePage() {
             }, 1000))
 
             setSaveTimeout(window.setTimeout(() => {
-                dispatch(updateItemIndex(listItem))
                 setSaved(false)
                 setSaveTimeout(false)
             }, 2500))
+        } else {
+            clearTimeout(timer);
+            clearTimeout(saveTimeout)
         }
     };
 
@@ -167,14 +152,13 @@ function HomePage() {
         )
     }
 
-    const generateItems = () => {
-        let rows = [];
-        Object.values(items)
+    const sortItems = () => {
+        return Object.values(items)
             .filter(lineItem => contactFilter(lineItem))
             .sort((a, b) => {
                 switch (sort.catagory) {
                     case "hostname": return a?.hostname?.localeCompare(b?.hostname) * sort.asc;
-                    case "ipAddress":
+                    case "ip_address":
                         let ipFirstSplitA = a?.ip_address?.split('.')[2]
                         while (ipFirstSplitA?.length < 3) {
                             ipFirstSplitA = "0" + ipFirstSplitA
@@ -199,13 +183,20 @@ function HomePage() {
                         } else {
                             return ipFirstSplitA?.localeCompare(ipFirstSplitB) * sort.asc
                         }
-                    case "macAddress":
+                    case "mac_address":
                         return a?.mac_address?.localeCompare(b?.mac_address) * sort.asc;
                     case "description":
                         return a?.description?.localeCompare(b?.description) * sort.asc;
                 }
             })
-            .forEach((listItem, idx) => {
+    }
+    const sortedItems = useMemo(() => sortItems(), [filter, sort, items]);
+
+    const generateItems = () => {
+        const rows = [];
+        const foundDuplicates = {};
+        sortedItems
+            .map((listItem, idx) => {
                 rows.push(
                     <tr key={listItem._id} id={listItem._id} className='table-row'>
                         <td onClick={e => { handleEditClick(listItem, e) }}>
@@ -246,24 +237,20 @@ function HomePage() {
         return rows
     };
 
-    const generatedItems = useMemo(() => generateItems(), []);
-
-
     return (
         <Container style={{ margin: '0px', padding: '0px', minWidth: '100%', display: 'flex', justifyContent: 'center' }}>
             <Banner filter={filter} setFilter={setFilter} setModalShow={setModalShow} />
             {saveTimeout ? <div className={`alert-container ${saved ? 'fade-in' : 'fade-out'}`}>
-                <div className="alert alert-primary alert-text" role="alert">
-                    Saved!
-                </div>
+                <Alert key='info' variant='info'>
+                    Saved
+                </Alert>
             </div> : null}
-
             <Table style={{ marginTop: '55px' }} bordered responsive>
                 <thead>
                     <tr>
                         <th className="item-column hostname" onClick={() => { handleTableSort("hostname") }}>{`Hostname ${sort.catagory === 'hostname' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
-                        <th className="item-table-header-added item-column ip-address" onClick={() => { handleTableSort("ipAddress") }}>{`IP Address ${sort.catagory === 'ipAddress' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
-                        <th className="item-table-header-qty item-column mac-address" onClick={() => { handleTableSort("macAddress") }}>{`MAC Address ${sort.catagory === 'macAddress' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
+                        <th className="item-table-header-added item-column ip-address" onClick={() => { handleTableSort("ip_address") }}>{`IP Address ${sort.catagory === 'ip_address' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
+                        <th className="item-table-header-qty item-column mac-address" onClick={() => { handleTableSort("mac_address") }}>{`MAC Address ${sort.catagory === 'mac_address' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
                         <th className="item-column description" onClick={() => { handleTableSort("description") }}>{`Description ${sort.catagory === 'description' ? sort.asc > 0 ? "↑" : "↓" : " "}`}</th>
                         <th></th>
                     </tr>
@@ -272,6 +259,12 @@ function HomePage() {
                     {generateItems()}
                 </tbody>
             </Table>
+            {error ? <div className={`alert-container 'fade-in'}`}>
+                <Alert key='danger' variant='danger' className="danger-alert">
+                    One or more duplicate fields
+                    <Button size="sm" variant="danger" className="jump-to-button" onClick={onJumpClick}>Jump to entry</Button>
+                </Alert>
+            </div> : null}
             <EditItemModal
                 show={modalShow}
                 item={item}
